@@ -1,0 +1,10 @@
+0 Satay
+1 Roti Canai
+2 Popiah
+3 Nasi Lemak
+4 Laksa
+5 Kaya Toast
+6 Burger
+7 Fried Rice
+8 Fried Noodle
+9 Waffle

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "111830369404",
+    "project_id": "fitallergycheck-f5752",
+    "storage_bucket": "fitallergycheck-f5752.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111830369404:android:9085a50fd97d8a2214b5f9",
+        "android_client_info": {
+          "package_name": "com.example.fit_allergy_check"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111830369404-8jfdem0o7adnoar1kkdhp7d7hbhqo6ao.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOaa3LTijdrr6VmmM7Lj73N1UjCW_Qy1s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111830369404-8jfdem0o7adnoar1kkdhp7d7hbhqo6ao.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "111830369404-ljj6f50is7sf0uupaq3her5p2jo9flmn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fitAllergyCheck"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
