@@ -192,7 +192,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Total Phosphate Content: "),
+                      Text("Total Phosphate: "),
                       Obx(() {
                         Color textColor = caloPhosController.totalPhospahte > phosLimit
                             ? Colors.red
