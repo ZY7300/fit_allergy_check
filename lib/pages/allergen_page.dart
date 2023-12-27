@@ -27,6 +27,16 @@ class _AllergenPageState extends State<AllergenPage> {
 
   List<ListAllergen> updatedAllerList = [];
 
+  bool isDescriptionVisible = false;
+
+  Allergen selectedAllergen = Allergen(
+    allerID: 0,
+    allerName: '',
+    desc: '',
+    isSelected: false,
+    status: 0,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -69,63 +79,92 @@ class _AllergenPageState extends State<AllergenPage> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 15, right: 15),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Search',
-                ),
-                onChanged: (query) {
-                  setState(() {
-                    searchQuery = query;
-                  });
-                },
-              ),
-            ),
-            Obx(
-              () {
-                // final allergenController = Get.find<AllergenController>();
-
-                final filteredAllergenList =
-                    widget.allergenList.where((allergen) {
-                  return allergen.allerName
-                      .toLowerCase()
-                      .contains(searchQuery.toLowerCase());
-                }).toList();
-
-                filteredAllergenList.sort((a, b) {
-                  if (a.isSelected && !b.isSelected) {
-                    return -1;
-                  } else if (!a.isSelected && b.isSelected) {
-                    return 1;
-                  } else {
-                    return b.status.compareTo(a.status);
-                  }
-                });
-
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredAllergenList.length,
-                    itemBuilder: (context, index) {
-                      final allergen = filteredAllergenList[index];
-                      return ListAllergen(
-                        uid: uid,
-                        allergen: allergen,
-                        onCheckboxChanged: (value) {
-                          setState(() {
-                            allergen.isSelected = value;
-                          });
-                        },
-                        onAllergenEdited: refreshAllergenList,
-                        onAllergenDeleted: refreshAllergenList,
-                      );
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 15, right: 15),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: 'Search',
+                    ),
+                    onChanged: (query) {
+                      setState(() {
+                        searchQuery = query;
+                      });
                     },
                   ),
-                );
-              },
+                ),
+                Obx(
+                  () {
+                    // final allergenController = Get.find<AllergenController>();
+
+                    final filteredAllergenList =
+                        widget.allergenList.where((allergen) {
+                      return allergen.allerName
+                          .toLowerCase()
+                          .contains(searchQuery.toLowerCase());
+                    }).toList();
+
+                    filteredAllergenList.sort((a, b) {
+                      if (a.isSelected && !b.isSelected) {
+                        return -1;
+                      } else if (!a.isSelected && b.isSelected) {
+                        return 1;
+                      } else {
+                        return b.status.compareTo(a.status);
+                      }
+                    });
+
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredAllergenList.length,
+                        itemBuilder: (context, index) {
+                          final allergen = filteredAllergenList[index];
+                          return ListAllergen(
+                            uid: uid,
+                            allergen: allergen,
+                            onCheckboxChanged: (value) {
+                              setState(() {
+                                allergen.isSelected = value;
+                              });
+                            },
+                            onAllergenEdited: refreshAllergenList,
+                            onAllergenDeleted: refreshAllergenList,
+                            onTap: () {
+                              setState(() {
+                                selectedAllergen = allergen;
+                                isDescriptionVisible = true;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
+            if (isDescriptionVisible)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isDescriptionVisible = false;
+                    });
+                  },
+                  child: Container(
+                    color: Colors.black.withOpacity(0.5),
+                    alignment: Alignment.center,
+                    child: SingleChildScrollView(
+                      child: AllergenDescriptionCard(
+                        allergen: selectedAllergen,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -153,6 +192,7 @@ class ListAllergen extends StatefulWidget {
   final Function(bool) onCheckboxChanged;
   final Function() onAllergenEdited;
   final Function() onAllergenDeleted;
+  final Function() onTap;
 
   ListAllergen({
     required this.uid,
@@ -160,6 +200,7 @@ class ListAllergen extends StatefulWidget {
     required this.onCheckboxChanged,
     required this.onAllergenEdited,
     required this.onAllergenDeleted,
+    required this.onTap,
   });
 
   @override
@@ -185,7 +226,12 @@ class _ListAllergenState extends State<ListAllergen> {
               }
             },
           ),
-          Expanded(child: Text(widget.allergen.allerName)),
+          Expanded(
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: Text(widget.allergen.allerName),
+            ),
+          ),
           widget.allergen.status == 1
               ? GestureDetector(
                   child: Icon(Icons.edit),
@@ -240,3 +286,36 @@ class _ListAllergenState extends State<ListAllergen> {
     );
   }
 }
+
+class AllergenDescriptionCard extends StatelessWidget {
+  final Allergen allergen;
+
+  const AllergenDescriptionCard({
+    Key? key,
+    required this.allergen,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(20),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              "${allergen.allerName.toUpperCase()}",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10,),
+            Text(
+              allergen.desc != "" ? "${allergen.desc}" : "No description.",
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

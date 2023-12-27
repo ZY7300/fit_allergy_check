@@ -9,6 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:tflite/tflite.dart';
 
 class CheckCaloPhosSodPage extends StatefulWidget {
@@ -162,12 +167,21 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                    child: Center(
-                      child: Text(
-                        "${widget.date.day}-${widget.date.month}-${widget.date.year}",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.menu_book),
+                          onPressed: () async {
+                            await generatePDF();
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   Row(
@@ -175,9 +189,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     children: [
                       Text("Total Calories: "),
                       Obx(() {
-                        Color textColor = caloPhosController.totalCalories > caloLimit
-                            ? Colors.red
-                            : Colors.black.withOpacity(0.7);
+                        Color textColor =
+                            caloPhosController.totalCalories > caloLimit
+                                ? Colors.red
+                                : Colors.black.withOpacity(0.7);
                         return Text(
                           "${caloPhosController.totalCalories}",
                           style: TextStyle(
@@ -194,9 +209,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     children: [
                       Text("Total Phosphate: "),
                       Obx(() {
-                        Color textColor = caloPhosController.totalPhospahte > phosLimit
-                            ? Colors.red
-                            : Colors.black.withOpacity(0.7);
+                        Color textColor =
+                            caloPhosController.totalPhospahte > phosLimit
+                                ? Colors.red
+                                : Colors.black.withOpacity(0.7);
                         return Text(
                           "${caloPhosController.totalPhospahte}",
                           style: TextStyle(
@@ -213,9 +229,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     children: [
                       Text("Total Sodium: "),
                       Obx(() {
-                        Color textColor = caloPhosController.totalSodium > sodLimit
-                            ? Colors.red
-                            : Colors.black.withOpacity(0.7);
+                        Color textColor =
+                            caloPhosController.totalSodium > sodLimit
+                                ? Colors.red
+                                : Colors.black.withOpacity(0.7);
                         return Text(
                           "${caloPhosController.totalSodium}",
                           style: TextStyle(
@@ -230,7 +247,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 15.0),
                     child: Container(
-                      height:300,
+                      height: 300,
                       width: MediaQuery.of(context).size.width,
                       child: Image.file(_image!),
                     ),
@@ -305,6 +322,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                             LoadingDialog.show();
                             await caloPhosController.addCalories(
                               uid,
+                              _output![0]['label']
+                                  .split(' ')
+                                  .sublist(1)
+                                  .join(' '),
                               foodMap[_output![0]['label']
                                   .split(' ')
                                   .sublist(1)
@@ -312,6 +333,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                             );
                             await caloPhosController.addPhosphate(
                               uid,
+                              _output![0]['label']
+                                  .split(' ')
+                                  .sublist(1)
+                                  .join(' '),
                               foodMap[_output![0]['label']
                                   .split(' ')
                                   .sublist(1)
@@ -319,6 +344,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                             );
                             await caloPhosController.addSodium(
                               uid,
+                              _output![0]['label']
+                                  .split(' ')
+                                  .sublist(1)
+                                  .join(' '),
                               foodMap[_output![0]['label']
                                   .split(' ')
                                   .sublist(1)
@@ -358,12 +387,21 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child: Center(
-                    child: Text(
-                      "${widget.date.day}-${widget.date.month}-${widget.date.year}",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.menu_book),
+                        onPressed: () async {
+                          await generatePDF();
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 Row(
@@ -371,9 +409,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                   children: [
                     Text("Total Calories: "),
                     Obx(() {
-                      Color textColor = caloPhosController.totalCalories > caloLimit
-                          ? Colors.red
-                          : Colors.black.withOpacity(0.7);
+                      Color textColor =
+                          caloPhosController.totalCalories > caloLimit
+                              ? Colors.red
+                              : Colors.black.withOpacity(0.7);
                       return Text(
                         "${caloPhosController.totalCalories}",
                         style: TextStyle(
@@ -390,9 +429,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                   children: [
                     Text("Total Phosphate: "),
                     Obx(() {
-                      Color textColor = caloPhosController.totalPhospahte > phosLimit
-                          ? Colors.red
-                          : Colors.black.withOpacity(0.7);
+                      Color textColor =
+                          caloPhosController.totalPhospahte > phosLimit
+                              ? Colors.red
+                              : Colors.black.withOpacity(0.7);
                       return Text(
                         "${caloPhosController.totalPhospahte}",
                         style: TextStyle(
@@ -409,9 +449,10 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                   children: [
                     Text("Total Sodium: "),
                     Obx(() {
-                      Color textColor = caloPhosController.totalSodium > sodLimit
-                          ? Colors.red
-                          : Colors.black.withOpacity(0.7);
+                      Color textColor =
+                          caloPhosController.totalSodium > sodLimit
+                              ? Colors.red
+                              : Colors.black.withOpacity(0.7);
                       return Text(
                         "${caloPhosController.totalSodium}",
                         style: TextStyle(
@@ -511,6 +552,110 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
 
     await classifyImage(_image!);
   }
+
+  Future<void> generatePDF() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text(
+                  "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                  style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 5),
+                pw.Text(
+                  "Food List",
+                  style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 20),
+                pw.Table(
+                  border: pw.TableBorder.all(),
+                  children: [
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("Food Name"),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("Calories"),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("Phosphate"),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("Sodium"),
+                        ),
+                      ],
+                    ),
+                    for (int i = 0; i < caloPhosController.caloList.length; i++)
+                      pw.TableRow(
+                        children: [
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text(caloPhosController.caloList[i].name),
+                          ),
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text("${caloPhosController.caloList[i].calories}"),
+                          ),
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text("${caloPhosController.phosList[i].phosphate}"),
+                          ),
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text("${caloPhosController.sodList[i].sodium}"),
+                          ),
+                        ],
+                      ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("Total", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("${caloPhosController.totalCalories.value}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("${caloPhosController.totalPhospahte.value}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text("${caloPhosController.totalSodium.value}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    final tempDir = await getTemporaryDirectory();
+    final tempPath = tempDir.path;
+    final pdfPath = '$tempPath/food_list_${widget.date.day}-${widget.date.month}-${widget.date.year}.pdf';
+    final pdfFile = File(pdfPath);
+    await pdfFile.writeAsBytes(await pdf.save());
+
+    OpenFile.open(pdfPath);
+  }
+
 
   @override
   void dispose() {

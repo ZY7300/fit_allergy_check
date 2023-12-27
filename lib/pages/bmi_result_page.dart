@@ -30,7 +30,7 @@ class _BMIResultPageState extends State<BMIResultPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: DataTable(
                 dataRowHeight: 37.0,
                 decoration: BoxDecoration(
@@ -91,33 +91,31 @@ class _BMIResultPageState extends State<BMIResultPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                child: Column(
-                  children: [
-                    SizedBox(height: 30.0,),
-                    Text(widget.bmiCategory, style: TextStyle(fontSize: 20),),
-                    SizedBox(height: 20,),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(20.0),
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 2.0,
-                        ),
-                      ),
-                      child: Text(
-                        widget.bmiValue,
-                        style: kNumberStyle,
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 70),
+              child: Column(
+                children: [
+                  SizedBox(height: 30.0,),
+                  Text(widget.bmiCategory, style: TextStyle(fontSize: 20),),
+                  SizedBox(height: 20,),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20.0),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2.0,
                       ),
                     ),
-                    SizedBox(height: 20,),
-                    Text(widget.words, style: TextStyle(fontSize: 16),),
-                  ],
-                ),
+                    child: Text(
+                      widget.bmiValue,
+                      style: kNumberStyle,
+                    ),
+                  ),
+                  SizedBox(height: 20,),
+                  Text(widget.words, style: TextStyle(fontSize: 16),),
+                ],
               ),
             ),
             Row(

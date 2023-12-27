@@ -32,6 +32,7 @@ import '../model/sodium.dart';
         final userCalories = calories.docs.map((doc) {
           final data = doc.data();
           return Calories(
+            name: data['name'],
             calories: data['calories'],
           );
         }).toList();
@@ -45,7 +46,7 @@ import '../model/sodium.dart';
       }
     }
 
-    Future<void> addCalories(String uid, int calories) async {
+    Future<void> addCalories(String uid, String name, int calories) async {
       try {
         date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
 
@@ -53,10 +54,11 @@ import '../model/sodium.dart';
         final caloData = {
           'uid': uid,
           'date': date,
+          'name': name,
           'calories': calories,
         };
 
-        caloList.add(Calories(calories: calories));
+        caloList.add(Calories(name: name, calories: calories));
 
         await collection.add(caloData);
         totalCalories.value = calcTotalCalories();
@@ -89,6 +91,7 @@ import '../model/sodium.dart';
         final userPhosphate = phosphate.docs.map((doc) {
           final data = doc.data();
           return Phosphate(
+            name: data['name'],
             phosphate: data['phosphate'],
           );
         }).toList();
@@ -102,7 +105,7 @@ import '../model/sodium.dart';
       }
     }
 
-    Future<void> addPhosphate(String uid, int phosphate) async {
+    Future<void> addPhosphate(String uid, String name, int phosphate) async {
       try {
         date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
 
@@ -110,10 +113,11 @@ import '../model/sodium.dart';
         final phosData = {
           'uid': uid,
           'date': date,
+          'name': name,
           'phosphate': phosphate,
         };
 
-        phosList.add(Phosphate(phosphate: phosphate));
+        phosList.add(Phosphate(name: name, phosphate: phosphate));
 
         await collection.add(phosData);
         totalPhospahte.value = calcTotalPhosphate();
@@ -146,6 +150,7 @@ import '../model/sodium.dart';
         final userSodium = sodium.docs.map((doc) {
           final data = doc.data();
           return Sodium(
+            name: data['name'],
             sodium: data['sodium'],
           );
         }).toList();
@@ -159,7 +164,7 @@ import '../model/sodium.dart';
       }
     }
 
-    Future<void> addSodium(String uid, int sodium) async {
+    Future<void> addSodium(String uid, String name, int sodium) async {
       try {
         date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
 
@@ -167,10 +172,11 @@ import '../model/sodium.dart';
         final sodData = {
           'uid': uid,
           'date': date,
+          'name': name,
           'sodium': sodium,
         };
 
-        sodList.add(Sodium(sodium: sodium));
+        sodList.add(Sodium(name: name, sodium: sodium));
 
         await collection.add(sodData);
         totalSodium.value = calcTotalSodium();
