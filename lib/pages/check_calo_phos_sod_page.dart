@@ -27,9 +27,13 @@ class CheckCaloPhosSodPage extends StatefulWidget {
 
 class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
   final authController = Get.put(AuthController());
-  final caloPhosController = Get.put(CaloPhosSodController());
+  final caloPhosSodController = Get.put(CaloPhosSodController());
 
   String uid = "";
+
+  int tempCalo = 0;
+  int tempPhos = 0;
+  int tempSod = 0;
 
   int caloLimit = 2200;
   int phosLimit = 4000;
@@ -51,6 +55,15 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
 
     setState(() {
       _output = output!;
+      tempCalo = caloPhosSodController.totalCalories.value +
+          foodMap[_output![0]['label'].split(' ').sublist(1).join(' ')]![
+              'calorie']!;
+      tempPhos = caloPhosSodController.totalPhospahte.value +
+          foodMap[_output![0]['label'].split(' ').sublist(1).join(' ')]![
+              'phosphate']!;
+      tempSod = caloPhosSodController.totalSodium.value +
+          foodMap[_output![0]['label'].split(' ').sublist(1).join(' ')]![
+              'sodium']!;
     });
 
     LoadingDialog.dismiss();
@@ -66,13 +79,13 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
     super.initState();
     uid = authController.uid.value;
     loadModel().then((value) {
-      caloPhosController.fetchCalories(uid).then((_) {
+      caloPhosSodController.fetchCalories(uid).then((_) {
         setState(() {});
       });
-      caloPhosController.fetchPhosphate(uid).then((_) {
+      caloPhosSodController.fetchPhosphate(uid).then((_) {
         setState(() {});
       });
-      caloPhosController.fetchSodium(uid).then((_) {
+      caloPhosSodController.fetchSodium(uid).then((_) {
         setState(() {});
       });
     });
@@ -165,83 +178,252 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
           ? SingleChildScrollView(
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "${widget.date.day}-${widget.date.month}-${widget.date.year}",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.menu_book),
-                          onPressed: () async {
-                            await generatePDF();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Total Calories: "),
-                      Obx(() {
-                        Color textColor =
-                            caloPhosController.totalCalories > caloLimit
-                                ? Colors.red
-                                : Colors.black.withOpacity(0.7);
-                        return Text(
-                          "${caloPhosController.totalCalories}",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: textColor),
-                        );
-                      }),
-                      Text(" calories"),
+                      Text(
+                        "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.menu_book),
+                        onPressed: () async {
+                          await generatePDF();
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("TOTAL"),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Center(child: Text("CURRENT")),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            "BALANCE",
+                            style: TextStyle(color: Colors.blue.shade900),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            "LIMIT",
+                            style: TextStyle(color: Colors.red.shade900),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("Calories: "),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() {
+                          Color textColor =
+                              caloPhosSodController.totalCalories > caloLimit
+                                  ? Colors.red
+                                  : Colors.black.withOpacity(0.7);
+                          return Center(
+                            child: Text(
+                              tempCalo >
+                                      caloPhosSodController.totalCalories.value
+                                  ? "$tempCalo"
+                                  : "${caloPhosSodController.totalCalories}",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor),
+                            ),
+                          );
+                        }),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() {
+                          int bal;
+                          tempCalo > caloPhosSodController.totalCalories.value
+                              ? bal = caloLimit - tempCalo
+                              : bal = caloLimit -
+                                  caloPhosSodController.totalCalories.value;
+                          Color textColor = bal.isNegative
+                              ? Colors.red
+                              : Colors.blue.shade900;
+                          return Center(
+                            child: Text(
+                              bal.toString(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor),
+                            ),
+                          );
+                        }),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            caloLimit.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red.shade900),
+                          ),
+                        ),
+                      ),
+                      // Text(" calories"),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Total Phosphate: "),
-                      Obx(() {
-                        Color textColor =
-                            caloPhosController.totalPhospahte > phosLimit
-                                ? Colors.red
-                                : Colors.black.withOpacity(0.7);
-                        return Text(
-                          "${caloPhosController.totalPhospahte}",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: textColor),
-                        );
-                      }),
-                      Text(" mg"),
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("Phosphate: "),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() {
+                          Color textColor =
+                              caloPhosSodController.totalPhospahte > phosLimit
+                                  ? Colors.red
+                                  : Colors.black.withOpacity(0.7);
+                          return Center(
+                            child: Text(
+                              tempPhos >
+                                      caloPhosSodController.totalPhospahte.value
+                                  ? "$tempPhos"
+                                  : "${caloPhosSodController.totalPhospahte}",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor),
+                            ),
+                          );
+                        }),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() {
+                          int bal;
+                          tempPhos > caloPhosSodController.totalPhospahte.value
+                              ? bal = phosLimit - tempPhos
+                              : bal = phosLimit -
+                              caloPhosSodController.totalPhospahte.value;
+                          Color textColor = bal.isNegative
+                              ? Colors.red
+                              : Colors.blue.shade900;
+                          return Center(
+                            child: Text(
+                              bal.toString(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor),
+                            ),
+                          );
+                        }),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            phosLimit.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red.shade900),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Total Sodium: "),
-                      Obx(() {
-                        Color textColor =
-                            caloPhosController.totalSodium > sodLimit
-                                ? Colors.red
-                                : Colors.black.withOpacity(0.7);
-                        return Text(
-                          "${caloPhosController.totalSodium}",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: textColor),
-                        );
-                      }),
-                      Text(" mg"),
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: Text("Sodium: "),
+                          )),
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() {
+                          Color textColor =
+                              caloPhosSodController.totalSodium > sodLimit
+                                  ? Colors.red
+                                  : Colors.black.withOpacity(0.7);
+                          return Center(
+                            child: Text(
+                              tempSod > caloPhosSodController.totalSodium.value
+                                  ? "$tempSod"
+                                  : "${caloPhosSodController.totalSodium}",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor),
+                            ),
+                          );
+                        }),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Obx(() {
+                          int bal;
+                          tempSod > caloPhosSodController.totalSodium.value
+                              ? bal = sodLimit - tempSod
+                              : bal = sodLimit -
+                              caloPhosSodController.totalSodium.value;
+                          Color textColor = bal.isNegative
+                              ? Colors.red
+                              : Colors.blue.shade900;
+                          return Center(
+                            child: Text(
+                              bal.toString(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor),
+                            ),
+                          );
+                        }),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            sodLimit.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red.shade900),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   Padding(
@@ -320,7 +502,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                         onPressed: () async {
                           try {
                             LoadingDialog.show();
-                            await caloPhosController.addCalories(
+                            await caloPhosSodController.addCalories(
                               uid,
                               _output![0]['label']
                                   .split(' ')
@@ -331,7 +513,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                                   .sublist(1)
                                   .join(' ')]!['calorie']!,
                             );
-                            await caloPhosController.addPhosphate(
+                            await caloPhosSodController.addPhosphate(
                               uid,
                               _output![0]['label']
                                   .split(' ')
@@ -342,7 +524,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                                   .sublist(1)
                                   .join(' ')]!['phosphate']!,
                             );
-                            await caloPhosController.addSodium(
+                            await caloPhosSodController.addSodium(
                               uid,
                               _output![0]['label']
                                   .split(' ')
@@ -385,83 +567,232 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
             )
           : Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "${widget.date.day}-${widget.date.month}-${widget.date.year}",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.menu_book),
-                        onPressed: () async {
-                          await generatePDF();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Total Calories: "),
-                    Obx(() {
-                      Color textColor =
-                          caloPhosController.totalCalories > caloLimit
-                              ? Colors.red
-                              : Colors.black.withOpacity(0.7);
-                      return Text(
-                        "${caloPhosController.totalCalories}",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: textColor),
-                      );
-                    }),
-                    Text(" calories"),
+                    Text(
+                      "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.menu_book),
+                      onPressed: () async {
+                        await generatePDF();
+                      },
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Text("TOTAL"),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Center(child: Text("CURRENT")),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          "BALANCE",
+                          style: TextStyle(color: Colors.blue.shade900),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          "LIMIT",
+                          style: TextStyle(color: Colors.red.shade900),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Text("Calories: "),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Obx(() {
+                        Color textColor =
+                            caloPhosSodController.totalCalories > caloLimit
+                                ? Colors.red
+                                : Colors.black.withOpacity(0.7);
+                        return Center(
+                          child: Text(
+                            "${caloPhosSodController.totalCalories}",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                        );
+                      }),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Obx(() {
+                        int bal = caloLimit -
+                            caloPhosSodController.totalCalories.value;
+                        Color textColor =
+                            bal.isNegative ? Colors.red : Colors.blue.shade900;
+                        return Center(
+                          child: Text(
+                            bal.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                        );
+                      }),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          caloLimit.toString(),
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.red.shade900),
+                        ),
+                      ),
+                    ),
+                    // Text(" calories"),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Total Phosphate: "),
-                    Obx(() {
-                      Color textColor =
-                          caloPhosController.totalPhospahte > phosLimit
-                              ? Colors.red
-                              : Colors.black.withOpacity(0.7);
-                      return Text(
-                        "${caloPhosController.totalPhospahte}",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: textColor),
-                      );
-                    }),
-                    Text(" mg"),
+                    Expanded(
+                      flex: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Text("Phosphate: "),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Obx(() {
+                        Color textColor =
+                            caloPhosSodController.totalPhospahte > phosLimit
+                                ? Colors.red
+                                : Colors.black.withOpacity(0.7);
+                        return Center(
+                          child: Text(
+                            "${caloPhosSodController.totalPhospahte}",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                        );
+                      }),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Obx(() {
+                        int bal = phosLimit -
+                            caloPhosSodController.totalPhospahte.value;
+                        Color textColor =
+                            bal.isNegative ? Colors.red : Colors.blue.shade900;
+                        return Center(
+                          child: Text(
+                            bal.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                        );
+                      }),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          phosLimit.toString(),
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.red.shade900),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Total Sodium: "),
-                    Obx(() {
-                      Color textColor =
-                          caloPhosController.totalSodium > sodLimit
-                              ? Colors.red
-                              : Colors.black.withOpacity(0.7);
-                      return Text(
-                        "${caloPhosController.totalSodium}",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: textColor),
-                      );
-                    }),
-                    Text(" mg"),
+                    Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Text("Sodium: "),
+                        )),
+                    Expanded(
+                      flex: 3,
+                      child: Obx(() {
+                        Color textColor =
+                            caloPhosSodController.totalSodium > sodLimit
+                                ? Colors.red
+                                : Colors.black.withOpacity(0.7);
+                        return Center(
+                          child: Text(
+                            "${caloPhosSodController.totalSodium}",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                        );
+                      }),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Obx(() {
+                        int bal =
+                            sodLimit - caloPhosSodController.totalSodium.value;
+                        Color textColor =
+                            bal.isNegative ? Colors.red : Colors.blue.shade900;
+                        return Center(
+                          child: Text(
+                            bal.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                        );
+                      }),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          sodLimit.toString(),
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.red.shade900),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 Expanded(flex: 1, child: Container()),
@@ -566,12 +897,14 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
               children: [
                 pw.Text(
                   "${widget.date.day}-${widget.date.month}-${widget.date.year}",
-                  style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                      fontSize: 18, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 5),
                 pw.Text(
                   "Food List",
-                  style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                      fontSize: 15, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 20),
                 pw.Table(
@@ -597,24 +930,30 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                         ),
                       ],
                     ),
-                    for (int i = 0; i < caloPhosController.caloList.length; i++)
+                    for (int i = 0;
+                        i < caloPhosSodController.caloList.length;
+                        i++)
                       pw.TableRow(
                         children: [
                           pw.Padding(
                             padding: pw.EdgeInsets.all(8),
-                            child: pw.Text(caloPhosController.caloList[i].name),
+                            child:
+                                pw.Text(caloPhosSodController.caloList[i].name),
                           ),
                           pw.Padding(
                             padding: pw.EdgeInsets.all(8),
-                            child: pw.Text("${caloPhosController.caloList[i].calories}"),
+                            child: pw.Text(
+                                "${caloPhosSodController.caloList[i].calories}"),
                           ),
                           pw.Padding(
                             padding: pw.EdgeInsets.all(8),
-                            child: pw.Text("${caloPhosController.phosList[i].phosphate}"),
+                            child: pw.Text(
+                                "${caloPhosSodController.phosList[i].phosphate}"),
                           ),
                           pw.Padding(
                             padding: pw.EdgeInsets.all(8),
-                            child: pw.Text("${caloPhosController.sodList[i].sodium}"),
+                            child: pw.Text(
+                                "${caloPhosSodController.sodList[i].sodium}"),
                           ),
                         ],
                       ),
@@ -622,19 +961,30 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                       children: [
                         pw.Padding(
                           padding: pw.EdgeInsets.all(8),
-                          child: pw.Text("Total", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          child: pw.Text("Total",
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
                         pw.Padding(
                           padding: pw.EdgeInsets.all(8),
-                          child: pw.Text("${caloPhosController.totalCalories.value}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          child: pw.Text(
+                              "${caloPhosSodController.totalCalories.value}",
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
                         pw.Padding(
                           padding: pw.EdgeInsets.all(8),
-                          child: pw.Text("${caloPhosController.totalPhospahte.value}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          child: pw.Text(
+                              "${caloPhosSodController.totalPhospahte.value}",
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
                         pw.Padding(
                           padding: pw.EdgeInsets.all(8),
-                          child: pw.Text("${caloPhosController.totalSodium.value}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          child: pw.Text(
+                              "${caloPhosSodController.totalSodium.value}",
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -649,13 +999,13 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
 
     final tempDir = await getTemporaryDirectory();
     final tempPath = tempDir.path;
-    final pdfPath = '$tempPath/food_list_${widget.date.day}-${widget.date.month}-${widget.date.year}.pdf';
+    final pdfPath =
+        '$tempPath/food_list_${widget.date.day}-${widget.date.month}-${widget.date.year}.pdf';
     final pdfFile = File(pdfPath);
     await pdfFile.writeAsBytes(await pdf.save());
 
     OpenFile.open(pdfPath);
   }
-
 
   @override
   void dispose() {
