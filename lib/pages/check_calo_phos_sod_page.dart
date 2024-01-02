@@ -99,6 +99,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
     'Fried Rice': {'calorie': 163, 'phosphate': 181, 'sodium': 396},
     'Fried Noodle': {'calorie': 460, 'phosphate': 199, 'sodium': 500},
     'Waffle': {'calorie': 291, 'phosphate': 200, 'sodium': 511},
+    'Banana': {'calorie': 105, 'phosphate': 13, 'sodium': 1},
     // 'Apple Pie': 237,
     // 'Bibimbap': 634,
     // 'Biscuit': 353,
