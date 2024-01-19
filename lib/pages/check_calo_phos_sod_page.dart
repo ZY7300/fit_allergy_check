@@ -6,6 +6,7 @@ import 'package:fit_allergy_check/component/my_dialog.dart';
 import 'package:fit_allergy_check/controller/auth_controller.dart';
 import 'package:fit_allergy_check/controller/calo_phos_sod_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -29,15 +30,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
   final authController = Get.put(AuthController());
   final caloPhosSodController = Get.put(CaloPhosSodController());
 
+  TextEditingController _selectedDateController = TextEditingController();
+  DateTime? selectedDate = DateTime.now();
+
+  bool isEditCalo = false;
+  bool isEditPhos = false;
+  bool isEditSod = false;
+  TextEditingController textEditingController = TextEditingController();
+
   String uid = "";
 
   int tempCalo = 0;
   int tempPhos = 0;
   int tempSod = 0;
 
-  int caloLimit = 2200;
-  int phosLimit = 4000;
-  int sodLimit = 2300;
+  int caloLimit = 0;
+  int phosLimit = 0;
+  int sodLimit = 0;
 
   File? _image;
   List? _output;
@@ -52,6 +61,13 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
       imageMean: 127.5,
       imageStd: 127.5,
     );
+
+    DateTime todayDate = DateTime.now();
+    _selectedDateController.text = "${todayDate.day}-${todayDate.month}-${todayDate.year}";
+
+    await caloPhosSodController.fetchCalories(uid, _selectedDateController.text);
+    await caloPhosSodController.fetchPhosphate(uid, _selectedDateController.text);
+    await caloPhosSodController.fetchSodium(uid, _selectedDateController.text);
 
     setState(() {
       _output = output!;
@@ -78,15 +94,24 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
   void initState() {
     super.initState();
     uid = authController.uid.value;
+    _selectedDateController.text =
+    "${selectedDate?.day}-${selectedDate?.month}-${selectedDate?.year}";
     loadModel().then((value) {
-      caloPhosSodController.fetchCalories(uid).then((_) {
+      caloPhosSodController.fetchCalories(uid, _selectedDateController.text).then((_) {
         setState(() {});
       });
-      caloPhosSodController.fetchPhosphate(uid).then((_) {
+      caloPhosSodController.fetchPhosphate(uid, _selectedDateController.text).then((_) {
         setState(() {});
       });
-      caloPhosSodController.fetchSodium(uid).then((_) {
+      caloPhosSodController.fetchSodium(uid, _selectedDateController.text).then((_) {
         setState(() {});
+      });
+      caloPhosSodController.fetchLimits(uid).then((limits) {
+        setState(() {
+          caloLimit = limits['caloLimit'] ?? 2200;
+          phosLimit = limits['phosLimit'] ?? 4000;
+          sodLimit = limits['sodLimit'] ?? 2300;
+        });
       });
     });
   }
@@ -183,14 +208,14 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                        "${_selectedDateController.text}",
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
                         icon: Icon(Icons.menu_book),
                         onPressed: () async {
-                          await generatePDF();
+                          await generatePDF(selectedDate!);
                         },
                       ),
                     ],
@@ -282,13 +307,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                       ),
                       Expanded(
                         flex: 3,
-                        child: Center(
-                          child: Text(
-                            caloLimit.toString(),
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.red.shade900),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              textEditingController.value = TextEditingValue(text: caloLimit.toString());
+                              isEditCalo = true;
+                              isEditPhos = false;
+                              isEditSod = false;
+                            });
+                          },
+                          child: Center(
+                            child: isEditCalo ? editText(1) : Text(
+                              caloLimit.toString(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.red.shade900),
+                            ),
                           ),
                         ),
                       ),
@@ -350,13 +385,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                       ),
                       Expanded(
                         flex: 3,
-                        child: Center(
-                          child: Text(
-                            phosLimit.toString(),
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.red.shade900),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              textEditingController.value = TextEditingValue(text: phosLimit.toString());
+                              isEditCalo = false;
+                              isEditPhos = true;
+                              isEditSod = false;
+                            });
+                          },
+                          child: Center(
+                            child: isEditPhos ? editText(2) : Text(
+                              phosLimit.toString(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.red.shade900),
+                            ),
                           ),
                         ),
                       ),
@@ -415,13 +460,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                       ),
                       Expanded(
                         flex: 3,
-                        child: Center(
-                          child: Text(
-                            sodLimit.toString(),
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.red.shade900),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              textEditingController.value = TextEditingValue(text: sodLimit.toString());
+                              isEditCalo = false;
+                              isEditPhos = false;
+                              isEditSod = true;
+                            });
+                          },
+                          child: Center(
+                            child: isEditSod ? editText(3) : Text(
+                              sodLimit.toString(),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.red.shade900),
+                            ),
                           ),
                         ),
                       ),
@@ -571,15 +626,24 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "${widget.date.day}-${widget.date.month}-${widget.date.year}",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    GestureDetector(
+                      onTap: () async {
+                        await _selectDate(context);
+                        await caloPhosSodController.fetchCalories(uid, _selectedDateController.text);
+                        await caloPhosSodController.fetchPhosphate(uid, _selectedDateController.text);
+                        await caloPhosSodController.fetchSodium(uid, _selectedDateController.text);
+                        setState(() {});
+                      },
+                      child: Text(
+                        "${_selectedDateController.text}",
+                        style:
+                            TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     IconButton(
                       icon: Icon(Icons.menu_book),
                       onPressed: () async {
-                        await generatePDF();
+                        await generatePDF(selectedDate!);
                       },
                     ),
                   ],
@@ -664,13 +728,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     ),
                     Expanded(
                       flex: 3,
-                      child: Center(
-                        child: Text(
-                          caloLimit.toString(),
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.red.shade900),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            textEditingController.value = TextEditingValue(text: caloLimit.toString());
+                            isEditCalo = true;
+                            isEditPhos = false;
+                            isEditSod = false;
+                          });
+                        },
+                        child: Center(
+                          child: isEditCalo ? editText(1) : Text(
+                            caloLimit.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red.shade900),
+                          ),
                         ),
                       ),
                     ),
@@ -725,13 +799,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     ),
                     Expanded(
                       flex: 3,
-                      child: Center(
-                        child: Text(
-                          phosLimit.toString(),
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.red.shade900),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            textEditingController.value = TextEditingValue(text: phosLimit.toString());
+                            isEditCalo = false;
+                            isEditPhos = true;
+                            isEditSod = false;
+                          });
+                        },
+                        child: Center(
+                          child: isEditPhos ? editText(2) : Text(
+                            phosLimit.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red.shade900),
+                          ),
                         ),
                       ),
                     ),
@@ -784,13 +868,23 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                     ),
                     Expanded(
                       flex: 3,
-                      child: Center(
-                        child: Text(
-                          sodLimit.toString(),
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.red.shade900),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            textEditingController.value = TextEditingValue(text: sodLimit.toString());
+                            isEditCalo = false;
+                            isEditPhos = false;
+                            isEditSod = true;
+                          });
+                        },
+                        child: Center(
+                          child: isEditSod ? editText(3) : Text(
+                            sodLimit.toString(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red.shade900),
+                          ),
                         ),
                       ),
                     ),
@@ -836,6 +930,39 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
                 Expanded(flex: 2, child: Container()),
               ],
             ),
+    );
+  }
+
+  Widget editText(int count) {
+    return Container(
+      height: 18,
+      child: TextFormField(
+        controller: textEditingController,
+        autofocus: true,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        keyboardType: TextInputType.number,
+        onFieldSubmitted: (value) {
+          if (count == 1) {
+            setState(() {
+              isEditCalo = false;
+              caloLimit = int.parse(value);
+            });
+          }
+          if (count == 2) {
+            setState(() {
+              isEditPhos = false;
+              phosLimit = int.parse(value);
+            });
+          }
+          if (count == 3) {
+            setState(() {
+              isEditSod = false;
+              sodLimit = int.parse(value);
+            });
+          }
+          caloPhosSodController.updateLimits(uid, caloLimit, phosLimit, sodLimit);
+        },
+      ),
     );
   }
 
@@ -885,7 +1012,24 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
     await classifyImage(_image!);
   }
 
-  Future<void> generatePDF() async {
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate!,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+
+    if (pickedDate != null && pickedDate != selectedDate) {
+      setState(() {
+        selectedDate = pickedDate;
+        _selectedDateController.text =
+        "${pickedDate.day}-${pickedDate.month}-${pickedDate.year}";
+      });
+    }
+  }
+
+  Future<void> generatePDF(DateTime date) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -897,7 +1041,7 @@ class _CheckCaloPhosSodPageState extends State<CheckCaloPhosSodPage> {
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
                 pw.Text(
-                  "${widget.date.day}-${widget.date.month}-${widget.date.year}",
+                  "${date.day}-${date.month}-${date.year}",
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold),
                 ),

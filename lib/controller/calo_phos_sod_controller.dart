@@ -19,14 +19,12 @@ import '../model/sodium.dart';
     DateTime currentDate = DateTime.now();
     String date = "";
 
-    Future<void> fetchCalories(String uid) async {
+    Future<void> fetchCalories(String uid, String selectedDate) async {
       try {
-        date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
-
         final calories = await _firestore
             .collection('Calories')
             .where('uid', isEqualTo: uid)
-            .where('date', isEqualTo: date)
+            .where('date', isEqualTo: selectedDate)
             .get();
 
         final userCalories = calories.docs.map((doc) {
@@ -78,14 +76,12 @@ import '../model/sodium.dart';
       return sum;
     }
 
-    Future<void> fetchPhosphate(String uid) async {
+    Future<void> fetchPhosphate(String uid, String selectedDate) async {
       try {
-        date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
-
         final phosphate = await _firestore
             .collection('Phosphate')
             .where('uid', isEqualTo: uid)
-            .where('date', isEqualTo: date)
+            .where('date', isEqualTo: selectedDate)
             .get();
 
         final userPhosphate = phosphate.docs.map((doc) {
@@ -137,14 +133,12 @@ import '../model/sodium.dart';
       return sum;
     }
 
-    Future<void> fetchSodium(String uid) async {
+    Future<void> fetchSodium(String uid, String selectedDate) async {
       try {
-        date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
-
         final sodium = await _firestore
             .collection('Sodium')
             .where('uid', isEqualTo: uid)
-            .where('date', isEqualTo: date)
+            .where('date', isEqualTo: selectedDate)
             .get();
 
         final userSodium = sodium.docs.map((doc) {
@@ -194,5 +188,41 @@ import '../model/sodium.dart';
         sum += sodium.sodium;
       }
       return sum;
+    }
+
+    Future<Map<String, dynamic>> fetchLimits(String uid) async {
+      try {
+        DocumentSnapshot limitSnapshot =
+        await FirebaseFirestore.instance.collection('Limit').doc(uid).get();
+
+        if (limitSnapshot.exists) {
+          Map<String, dynamic> limits = {
+            'caloLimit': limitSnapshot['caloLimit'] ?? 2200,
+            'phosLimit': limitSnapshot['phosLimit'] ?? 4000,
+            'sodLimit': limitSnapshot['sodLimit'] ?? 2300,
+          };
+
+          return limits;
+        }
+
+        return {};
+      } catch (e) {
+        print('Error fetching limits: $e');
+        Get.dialog(MyDialog(title: "Error", message: "Error fetching limits", dialogType: DialogType.error, withBtn: false));
+        return {};
+      }
+    }
+
+    Future<void> updateLimits(String uid, int caloLimit, int phosLimit, int sodLimit) async {
+      try {
+        await FirebaseFirestore.instance.collection('Limit').doc(uid).set({
+          'caloLimit': caloLimit,
+          'phosLimit': phosLimit,
+          'sodLimit': sodLimit,
+        }, SetOptions(merge: true));
+      } catch (e) {
+        print('Error updating limits: $e');
+        Get.dialog(MyDialog(title: "Error", message: "Error updating limits", dialogType: DialogType.error, withBtn: false));
+      }
     }
   }

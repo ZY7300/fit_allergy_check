@@ -104,6 +104,12 @@ class _ResultPageState extends State<ResultPage> {
             widget.allergenLists != null ? Text(!match
                 ? 'This food does not contains any allergen ingredient'
                 : 'This food contains ${matchList.toString()}') : Container(),
+            widget.underwLists != null ? Text(!match
+                ? 'This food does not contains any avoided ingredient'
+                : 'This food contains ${matchList.toString()}') : Container(),
+            widget.overwLists != null ? Text(!match
+                ? 'This food does not contains any avoided ingredient'
+                : 'This food contains ${matchList.toString()}') : Container(),
             const SizedBox(
               height: 15.0,
             ),
