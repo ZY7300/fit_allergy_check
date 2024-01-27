@@ -46,7 +46,7 @@ import '../model/sodium.dart';
 
     Future<void> addCalories(String uid, String name, int calories) async {
       try {
-        date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
+        date = "${currentDate.day}-${currentDate.month}-${currentDate.year}";
 
         final collection = _firestore.collection('Calories');
         final caloData = {
@@ -103,7 +103,7 @@ import '../model/sodium.dart';
 
     Future<void> addPhosphate(String uid, String name, int phosphate) async {
       try {
-        date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
+        date = "${currentDate.day}-${currentDate.month}-${currentDate.year}";
 
         final collection = _firestore.collection('Phosphate');
         final phosData = {
@@ -160,7 +160,7 @@ import '../model/sodium.dart';
 
     Future<void> addSodium(String uid, String name, int sodium) async {
       try {
-        date = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
+        date = "${currentDate.day}-${currentDate.month}-${currentDate.year}";
 
         final collection = _firestore.collection('Sodium');
         final sodData = {
